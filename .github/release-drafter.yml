@@ -1,0 +1,59 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+categories:
+  - title: "👀 Breaking changes"
+    labels:
+      - "major"
+  - title: "🚀 Features"
+    labels:
+      - "feature"
+      - "minor"
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "bug"
+      - "patch"
+  - title: "🧰 Maintenance"
+    label: "chore"
+  - title: "📖 Docs"
+    label: "docs"
+
+template: |
+  $CHANGES
+
+change-template: "- $TITLE #$NUMBER (@$AUTHOR)"
+change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
+version-resolver:
+  major:
+    labels: []
+  minor:
+    labels:
+      - "major"
+      - "minor"
+  patch:
+    labels:
+      - "patch"
+  default: patch
+
+autolabeler:
+  - label: "chore"
+    files:
+      - "go.mod"
+      - "go.sum"
+    branch:
+      - '/patch{0,1}\/.+/'
+      - '/renovate{0,1}\/.+/'
+  - label: "docs"
+    files:
+      - "*.md"
+    branch:
+      - '/docs{0,1}\/.+/'
+  - label: "bug"
+    branch:
+      - '/fix\/.+/'
+    title:
+      - "/fix/i"
+  - label: "feature"
+    branch:
+      - '/feature\/.+/'
+    body:
+      - "/US-[0-9]{1,4}/"
