@@ -1,57 +1,65 @@
 name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
 categories:
+  # Order matters: `exclusive` stops a pull request from also landing in a
+  # later section, so each change is listed once under its most significant type.
   - title: "👀 Breaking changes"
-    labels:
-      - "major"
+    exclusive: true
+    when:
+      label: "major"
   - title: "🚀 Features"
-    labels:
-      - "feature"
-      - "minor"
+    exclusive: true
+    when:
+      labels:
+        - "feature"
+        - "minor"
   - title: "🐛 Bug Fixes"
-    labels:
-      - "bug"
-      - "patch"
+    exclusive: true
+    when:
+      labels:
+        - "bug"
+        - "patch"
   - title: "🧰 Maintenance"
-    label: "chore"
+    exclusive: true
+    when:
+      label: "chore"
   - title: "📖 Docs"
-    label: "docs"
+    when:
+      - label: "docs"
+      # Most code changes also touch a README; only Markdown-only changes are docs.
+      - paths:
+          - "*.md"
+        paths-mode: only
+  - type: "version-resolver"
+    semver-increment: "minor"
+    when:
+      labels:
+        - "major"
+        - "minor"
+  - type: "version-resolver"
+    semver-increment: "patch"
 
 template: |
   $CHANGES
 
 change-template: "- $TITLE #$NUMBER (@$AUTHOR)"
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
-version-resolver:
-  major:
-    labels: []
-  minor:
-    labels:
-      - "major"
-      - "minor"
-  patch:
-    labels:
-      - "patch"
-  default: patch
 
+# Matchers within a rule are OR'ed, so file matchers label every PR that merely
+# touches those files; rules key off branch names and titles instead.
 autolabeler:
   - label: "chore"
-    files:
-      - "go.mod"
-      - "go.sum"
     branch:
-      - '/patch{0,1}\/.+/'
-      - '/renovate{0,1}\/.+/'
+      - '/patch\/.+/'
+      - '/renovate\/.+/'
   - label: "docs"
-    files:
-      - "*.md"
     branch:
-      - '/docs{0,1}\/.+/'
+      - '/docs?\/.+/'
   - label: "bug"
     branch:
       - '/fix\/.+/'
     title:
-      - "/fix/i"
+      - '/^fix(\(.+\))?!?:/i'
   - label: "feature"
     branch:
       - '/feature\/.+/'
